@@ -9,11 +9,19 @@ MINIO_INTERNAL_PORT=9090
 
 cf delete -f -r $APP_NAME
 
-cat > app/.profile <<EOF
-nohup /home/vcap/deps/0/bin/minio server --address 0.0.0.0:$MINIO_INTERNAL_PORT /home/vcap &
+cat > app/bin/Debug/netcoreapp2.2/publish/.profile <<EOF
+start_command="\$(jq -r .start_command /home/vcap/staging_info.yml)"
+
+while sleep 1; do 
+  bash -c "\$start_command" &
+  echo \$! > /home/vcap/tmp/start_command.pid
+  wait
+done &
+/home/vcap/deps/0/bin/mc watch --no-color --events put /home/vcap/app/ | while read; do kill \$(cat /home/vcap/tmp/start_command.pid); done &
+/home/vcap/deps/0/bin/minio server --address 0.0.0.0:$MINIO_INTERNAL_PORT /home/vcap &
 EOF
 
-cf push $APP_NAME -p app -b https://github.com/micahyoung/minio-buildpack.git -b dotnet_core_buildpack -k 2GB --no-start
+cf push $APP_NAME -p app/bin/Debug/netcoreapp2.2/publish/ -b https://github.com/micahyoung/minio-buildpack.git -b dotnet_core_buildpack -k 2GB --no-start -u none -c 'sleep 99999'
 
 cf set-env $APP_NAME MINIO_ACCESS_KEY $MINIO_ACCESS_KEY
 cf set-env $APP_NAME MINIO_SECRET_KEY $MINIO_SECRET_KEY
@@ -31,4 +39,4 @@ cf curl /v2/route_mappings -X POST -d "{\"app_guid\": \"$APP_GUID\", \"route_gui
 
 cf ssh $APP_NAME -c 'tar -c -C deps/0 mc' | tar -x -C bin
 
-bin/mc config host add myminio https://$MINIO_HTTP_ROUTE $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+bin/mc --insecure config host add $APP_NAME https://$MINIO_ROUTE_HOSTNAME.$CF_DOMAIN $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
