@@ -9,9 +9,13 @@ MINIO_INTERNAL_PORT=9090
 
 cf delete -f -r $APP_NAME
 
-cp profile.sh app/bin/Debug/netcoreapp2.2/publish/.profile
+# Windows app
+# cp profile.bat app-windows/.profile.bat
+# cf push $APP_NAME --no-start -p app-windows/ -b hwc_buildpack -s windows -k 2GB
 
-cf push $APP_NAME --no-start -p app/bin/Debug/netcoreapp2.2/publish/ -b https://github.com/micahyoung/minio-buildpack.git -b dotnet_core_buildpack -u none -k 2GB
+# Linux app
+# cp profile.sh app-linux/bin/Debug/netcoreapp2.2/publish/.profile
+# cf push $APP_NAME --no-start -p app-linux/bin/Debug/netcoreapp2.2/publish/ -b dotnet_core_buildpack -k 2GB
 
 cf set-env $APP_NAME MINIO_ACCESS_KEY $MINIO_ACCESS_KEY
 cf set-env $APP_NAME MINIO_SECRET_KEY $MINIO_SECRET_KEY
@@ -26,7 +30,5 @@ MINIO_HTTP_ROUTE=$(cf create-route $CF_SPACE $CF_DOMAIN --hostname $MINIO_ROUTE_
 MINIO_ROUTE_GUID=$(cf curl /v2/routes?q=host:$MINIO_ROUTE_HOSTNAME | jq -r .resources[0].metadata.guid)
 
 cf curl /v2/route_mappings -X POST -d "{\"app_guid\": \"$APP_GUID\", \"route_guid\": \"$MINIO_ROUTE_GUID\", \"app_port\": $MINIO_INTERNAL_PORT}"
-
-cf ssh $APP_NAME -c 'gzip --stdout /home/vcap/deps/0/bin/mc' | gzip --decompress > bin/mc
 
 bin/mc --insecure config host add $APP_NAME https://$MINIO_ROUTE_HOSTNAME.$CF_DOMAIN $MINIO_ACCESS_KEY $MINIO_SECRET_KEY

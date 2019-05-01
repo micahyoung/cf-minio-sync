@@ -6,6 +6,11 @@ set -o nounset
 MINIO_INTERNAL_PORT=9090 # must be wired up to route or used over SSH
 PIDFILE="/home/vcap/tmp/start_command.pid"
 
+# download minio server and client
+curl --silent --output "/home/vcap/deps/minio" "https://dl.minio.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2019-04-23T23-50-36Z"
+curl --silent --output "/home/vcap/deps/mc"    "https://dl.minio.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2019-04-24T00-09-41Z"
+chmod +x /home/vcap/deps/minio /home/vcap/deps/mc
+
 # current process will become normal start process
 echo $$ > $PIDFILE
 
@@ -13,10 +18,10 @@ echo $$ > $PIDFILE
 start_command="$(jq -r .start_command /home/vcap/staging_info.yml)"
 
 # minio server exposes every directory in $HOME as bucket
-/home/vcap/deps/0/bin/minio server --address 0.0.0.0:$MINIO_INTERNAL_PORT /home/vcap &
+/home/vcap/deps/minio server --address 0.0.0.0:$MINIO_INTERNAL_PORT /home/vcap &
 
 # mc watch observers changes in $HOME/app and pipes and change...
-/home/vcap/deps/0/bin/mc watch --no-color --events put /home/vcap/app/ | while read; do 
+/home/vcap/deps/mc watch --no-color --events put /home/vcap/app/ | while read; do 
     # if there's a PID
     #    kill process and clear pid file
     if [ -f $PIDFILE ]; then
