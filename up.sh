@@ -27,6 +27,6 @@ MINIO_ROUTE_GUID=$(cf curl /v2/routes?q=host:$MINIO_ROUTE_HOSTNAME | jq -r .reso
 
 cf curl /v2/route_mappings -X POST -d "{\"app_guid\": \"$APP_GUID\", \"route_guid\": \"$MINIO_ROUTE_GUID\", \"app_port\": $MINIO_INTERNAL_PORT}"
 
-cf ssh $APP_NAME -c 'tar -c -C /home/vcap/deps/0 mc' | tar -x -C bin
+cf ssh $APP_NAME -c 'gzip --stdout /home/vcap/deps/0/bin/mc' | gzip --decompress > bin/mc
 
 bin/mc --insecure config host add $APP_NAME https://$MINIO_ROUTE_HOSTNAME.$CF_DOMAIN $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
