@@ -11,16 +11,16 @@
   * Mac
   ```bash
   mkdir bin
-  wget https://dl.minio.io/client/mc/release/darwin-amd64/mc
-  chmod +x mc
-  ./mc --help
+  curl -o bin/mc https://dl.minio.io/client/mc/release/darwin-amd64/mc
+  chmod +x bin/mc
+  bin/mc --help
   ```
   * Linux
   ```bash
   mkdir bin
-  wget https://dl.minio.io/client/mc/release/linux-amd64/mc
-  chmod +x mc
-  ./mc --help
+  curl -o bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc
+  chmod +x bin/mc
+  bin/mc --help
   ```
 
 
@@ -43,7 +43,7 @@ export CF_DOMAIN=<existing CF domain to use for your route>
 dotnet publish app-linux/
 ```
 
-1. Run `up.sh`
+1. Run `./up.sh` to bring up app in sync-ready state
 
 1. Visit your app page
 
