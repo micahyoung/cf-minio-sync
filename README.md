@@ -58,7 +58,7 @@
 
 1. Mirror your changes to app instance
    ```bash
-   bin/mc mirror <app dir>/ <app name>/app/     #ex: bin/mc mirror app-linux/ my-app/app/
+   bin/mc mirror --overwrite <app dir>/ <app name>/app/     #ex: bin/mc mirror --overwrite app-linux/ my-app/app/
    ```
 
 1. Visit your app page and see it updated
