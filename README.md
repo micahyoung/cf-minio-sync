@@ -27,21 +27,23 @@
 ### Note
 **No** AWS S3 account is required, this demo will create a private, self-contained Minio S3 connection from your workstation to your app.
 
+
+# Automated setup
 1. Create an `env.sh` file:
-```bash
-export APP_NAME=<desired CF app name. Ex: "my-app">
-export MINIO_ACCESS_KEY=<any desired password for minio connection>
-export MINIO_SECRET_KEY=<any desired password for minio connection>
-export MINIO_ROUTE_HOSTNAME=<any desired CF hostname to be used for your S3 route. Ex: "my-app-s3">
-export CF_DOMAIN=<existing CF domain to use for your route>
-```
+   ```bash
+   export APP_NAME=<desired CF app name. Ex: "my-app">
+   export MINIO_ACCESS_KEY=<any desired password for minio connection>
+   export MINIO_SECRET_KEY=<any desired password for minio connection>
+   export MINIO_ROUTE_HOSTNAME=<any desired CF hostname to be used for your S3 route. Ex: "my-app-s3">
+   export CF_DOMAIN=<existing CF domain to use for your route>
+   ```
 
 1. Uncomment relevant `cf push ` command in `up.sh`
 
 1. (app-linux only) Publish your app
-```bash
-dotnet publish app-linux/
-```
+   ```bash
+   dotnet publish app-linux/
+   ```
 
 1. Run `./up.sh` to bring up app in sync-ready state
 
@@ -50,13 +52,13 @@ dotnet publish app-linux/
 1. Make a change to your app
 
 1. (app-linux only) Re-publish your app
-```bash
-dotnet publish app-linux/
-```
+   ```bash
+   dotnet publish app-linux/
+   ```
 
 1. Mirror your changes to app instance
-```bash
-bin/mc mirror <app dir>/ <app name>/app/     #ex: bin/mc mirror app-linux/ my-app/app/
-```
+   ```bash
+   bin/mc mirror <app dir>/ <app name>/app/     #ex: bin/mc mirror app-linux/ my-app/app/
+   ```
 
 1. Visit your app page and see it updated
