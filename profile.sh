@@ -3,8 +3,19 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+# replace PORT with alternate so chisel listens on 8080 and start command uses 8081
+ORIGINAL_APP_PORT=$PORT
+ALT_APP_PORT=8081
+export PORT=$ALT_APP_PORT
+
+unset ASPNETCORE_URLS
+
 MINIO_INTERNAL_PORT=9090 # must be wired up to route or used over SSH
 PIDFILE="/home/vcap/tmp/start_command.pid"
+
+# download chisel
+curl --silent --location "https://github.com/jpillora/chisel/releases/download/1.3.1/chisel_linux_amd64.gz" | gzip -d > /home/vcap/deps/chisel
+chmod +x /home/vcap/deps/chisel
 
 # download minio server and client
 curl --silent --output "/home/vcap/deps/minio" "https://dl.minio.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2019-04-23T23-50-36Z"
@@ -16,6 +27,9 @@ echo $$ > $PIDFILE
 
 # read start command from staging_info
 start_command="$(jq -r .start_command /home/vcap/staging_info.yml)"
+
+# chisel server 
+/home/vcap/deps/chisel server --port $ORIGINAL_APP_PORT --proxy "http://127.0.0.1:$ALT_APP_PORT" &
 
 # minio server exposes every directory in $HOME as bucket
 /home/vcap/deps/minio server --address 0.0.0.0:$MINIO_INTERNAL_PORT /home/vcap &
@@ -51,7 +65,7 @@ while true; do
   fi
   
   # Run start_command in background
-  echo "Starting command: $start_command"
+  echo "Starting command: $start_command on port $PORT"
   bash -c "$start_command" &
 
   # write pidfile immediately to block further starts
