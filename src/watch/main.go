@@ -17,8 +17,8 @@ func main() {
 			Usage: "cf app name",
 		},
 		cli.StringFlag{
-			Name:  "app-route, r",
-			Usage: "cf app route (ex: my-app.my-domain.com)",
+			Name:  "app-url, u",
+			Usage: "cf app URL (ex: http://my-app.my-domain.com)",
 		},
 		cli.StringFlag{
 			Name:  "s3-port, p",
@@ -38,12 +38,12 @@ func main() {
 
 	app.Action = func(c *cli.Context) (err error) {
 		watchDir := c.String("watch-dir")
-		appRoute := c.String("app-route")
+		appURL := c.String("app-url")
 		s3Port := c.String("s3-port")
 		s3AccessKey := c.String("s3-access-key")
 		s3SecretKey := c.String("s3-secret-key")
 
-		if appRoute == "" || s3Port == "" || s3AccessKey == "" || s3SecretKey == "" {
+		if appURL == "" || s3Port == "" || s3AccessKey == "" || s3SecretKey == "" {
 			return errors.New("add all required fields")
 		}
 
@@ -52,11 +52,12 @@ func main() {
 			return err
 		}
 
-		watcher := NewWatcher(watchDir, appRoute, s3Port, s3AccessKey, s3SecretKey)
+		watcher := NewWatcher(watchDir, appURL, s3Port, s3AccessKey, s3SecretKey)
 		err = watcher.Run()
 		if err != nil {
 			return err
 		}
+		defer watcher.Cleanup()
 
 		return nil
 	}

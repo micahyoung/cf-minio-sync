@@ -23,7 +23,7 @@ curl --silent --output "/home/vcap/deps/mc"    "https://dl.minio.io/client/mc/re
 chmod +x /home/vcap/deps/minio /home/vcap/deps/mc
 
 # current process will become normal start process
-echo $$ > $PIDFILE
+# echo $$ > $PIDFILE
 
 # read start command from staging_info
 start_command="$(jq -r .start_command /home/vcap/staging_info.yml)"
@@ -71,4 +71,4 @@ while true; do
   # write pidfile immediately to block further starts
   echo $! > $PIDFILE
   echo "New PID: $(cat $PIDFILE)"
-done &
+done
